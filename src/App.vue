@@ -1,45 +1,77 @@
 <template>
-  <div>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-      <div class="container">
-        <router-link to="/produk" class="navbar-brand">Manajemen Produk</router-link>
+  <div id="app">
+    <!-- Tidak tampilkan sidebar di halaman auth -->
+    <template v-if="showAuthPages">
+      <router-view />
+    </template>
+    
+    <!-- Tampilkan layout dengan sidebar untuk halaman yang membutuhkan auth -->
+    <template v-else>
+      <div class="app-layout">
+        <Sidebar />
+        <main class="main-content">
+          <router-view />
+        </main>
       </div>
-    </nav>
-
-    <router-view />
+    </template>
   </div>
 </template>
 
-
-
-
 <script>
-import Produk from "./views/Produk.vue";
+import Sidebar from "./components/Sidebar.vue";
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 
 export default {
   name: "App",
   components: {
-    Produk,
+    Sidebar,
   },
+  setup() {
+    const route = useRoute()
+    
+    const showAuthPages = computed(() => {
+      const authRoutes = ['Welcome', 'Login', 'Register']
+      return authRoutes.includes(route.name)
+    })
+
+    return {
+      showAuthPages
+    }
+  }
 };
 </script>
 
-
-
-
-
-
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+
+.app-layout {
+  width: 100%;
+  /* display: flex; */
+  /* min-height: 100vh; */
 }
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+
+.main-content {
+  flex: 1;
+  /* margin-left: 280px; */
+  padding: 2vh;
+  /* background-color: #f8f9fa; */
+  min-height: 100vh;
+  transition: margin-left 0.3s ease;
+}
+
+.sidebar-collapsed ~ .main-content {
+  margin-left: 80px;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+  }
 }
 </style>
