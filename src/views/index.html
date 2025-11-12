@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rosoqin - Ubah Barang Jadi Uang</title>
+  <style>
+  /* Font pertama: Coolvetica */
+  @font-face {
+    font-family: 'Coolvetica';
+    src: url('fonts/Coolvetica Rg.otf') format('opentype');
+  }
+
+  /* Font kedua: Savate */
+  @font-face {
+    font-family: 'Savate';
+    src: url('fonts/Savate-SemiBold.ttf') format('truetype');
+  }
+
+  .judul {
+    font-family: "Savate";
+  }
+
+  :root {
+    --merah: #D00C1C;
+    --hitam: #323232;
+    --putih: #FBF4E8;
+    --abu: #8D8A84;
+  }
+
+  span, h2 {
+    font-family: "Coolvetica";
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Helvetica", sans-serif;
+  }
+
+  body {
+    background-color: var(--putih);
+    color: var(--hitam);
+    line-height: 1.6;
+  }
+
+  /* ============= HERO ============= */
+  .hero {
+    position: relative;
+    height: 70vh;
+    background: url("bg1.jpg") no-repeat center center / cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: white;
+    transition: background-image 1s ease-in-out;
+    border-bottom: 4px solid var(--hitam);
+  }
+
+  .hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--hitam);
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-content h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .btn-primary {
+    margin-top: 20px;
+    padding: 12px 25px;
+    background-color: var(--merah);
+    border: none;
+    color: var(--putih);
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  .btn-primary:hover {
+    background-color: var(--merah);
+  }
+
+  /* ============= BANNER ============= */
+/* ============= BANNER ============= */
+.banner {
+  background-color: var(--merah);
+  color: var(--putih);
+  font-weight: 700;
+  overflow: hidden;
+  white-space: nowrap;
+  border-top: 3px solid var(--putih);
+  border-bottom: 3px solid var(--putih);
+  position: relative;
+  padding: 15px 0;
+}
+
+.banner-track {
+  display: inline-flex; /* 🔹 inline-flex agar panjang sesuai isi */
+  width: auto;
+  animation: scrollText 18s linear infinite;
+}
+
+@keyframes scrollText {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.banner-content {
+  display: flex;
+}
+
+.banner span {
+  font-size: 2.3rem;
+  text-transform: uppercase;
+  margin: 0 30px;
+  letter-spacing: 2px;
+  position: relative;
+  padding: 10px 0; /* 🔹 Tambah padding atas-bawah agar lebih lega */
+  display: inline-block; /* 🔹 Supaya padding berpengaruh penuh */
+}
+
+
+
+  /* ============= SECTION UMUM ============= */
+  section {
+    padding: 60px 10%;
+    border-bottom: 3px solid var(--putih);
+  }
+
+section h2 {
+  position: relative;
+  text-align: center;
+  font-weight: normal;
+  color: var(--hitam);
+  letter-spacing: 1px;
+  margin: 50px 0 40px;
+  padding: 15px 0;
+  border-top: 2px solid var(--abu);  /* 🔹 Garis atas */
+  border-bottom: 2px solid var(--abu); /* 🔹 Garis bawah */
+}
+
+/* 🔹 Untuk bagian gelap seperti Statistik & Gabung Sekarang */
+.stats h2 {
+  border-top: 2px solid var(--putih);
+  border-bottom: 2px solid var(--putih);
+  color: var(--putih);
+}
+
+  /* ============= CARA KERJA ============= */
+  .steps {
+    background-color: var(--putih);
+    border-top: 3px solid var(--putih);
+  }
+
+  .step-container {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    flex-wrap: wrap;
+    gap: 30px;
+  }
+
+  .step-box {
+    flex: 1;
+    min-width: 250px;
+    max-width: 300px;
+    background-color: var(--putih);
+    border: 1.5px solid var(--abu);
+    padding: 30px 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  .step-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 3px 8px rgba(141, 138, 132, 0.3);
+  }
+
+  .step-box h3 {
+    font-size: 2rem;
+    color: var(--merah);
+    margin-bottom: 10px;
+    border-bottom: 1.5px solid var(--abu);
+    display: inline-block;
+    padding-bottom: 5px;
+  }
+
+  /* ============= STATISTIK ============= */
+  .stats {
+    background-color: var(--hitam);
+    color: var(--putih);
+    text-align: center;
+    border-top: 3px solid var(--merah);
+    border-bottom: 3px solid var(--merah);
+    padding: 60px 10%;
+  }
+
+  .stats h2 {
+    color: var(--putih);
+    margin-bottom: 40px;
+  }
+
+  .stats-container {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    gap: 30px;
+    flex-wrap: wrap;
+  }
+
+  .stat-box {
+    flex: 1;
+    min-width: 200px;
+    max-width: 280px;
+    background-color: var(--hitam);
+    border: 1.5px solid var(--abu);
+    padding: 30px 25px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+  }
+
+  .stat-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 3px 8px rgba(141, 138, 132, 0.3);
+  }
+
+  .stat-box h3 {
+    font-size: 2.2rem;
+    color: var(--merah);
+    margin-bottom: 8px;
+  }
+
+  .stat-box p {
+    font-size: 1rem;
+    color: var(--putih);
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  /* ============= TESTIMONI ============= */
+  .testimoni {
+    background-color: var(--putih);
+    text-align: center;
+    padding: 60px 10%;
+  }
+
+  .testi-container {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    flex-wrap: wrap;
+    gap: 30px;
+  }
+
+  .testi-box {
+    flex: 1;
+    min-width: 250px;
+    max-width: 300px;
+    background-color: var(--putih);
+    border: 1.5px solid var(--abu);
+    padding: 30px 25px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+  }
+
+  .testi-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 3px 8px rgba(141, 138, 132, 0.3);
+  }
+
+  .testi-box p {
+    font-size: 1rem;
+    color: var(--hitam);
+    margin-bottom: 15px;
+    line-height: 1.4;
+  }
+
+  .testi-box h4 {
+    color: var(--abu);
+    font-weight: 600;
+    border-top: 1px solid var(--abu);
+    padding-top: 10px;
+  }
+
+  /* ============= GABUNG SEKARANG ============= */
+  .join {
+    background-color: var(--hitam);
+    color: var(--putih);
+    text-align: center;
+    padding: 80px 20px;
+    border-top: 3px solid var(--merah);
+    border-bottom: 3px solid var(--merah);
+  }
+
+  .join h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+  }
+
+  .kolum3 {
+    align-items: start;
+  }
+
+  /* ============= FOOTER ============= */
+  .footer-modern {
+    background-color: var(--merah);
+    color: var(--putih);
+    padding: 50px 0;
+  }
+
+  .footer-container {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    margin: 0 auto;
+    text-align: left;
+    gap: 2vh;
+  }
+
+  .footer-column h3 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    font-weight: 700;
+  }
+
+  .footer-column ul {
+    list-style-type: disc;
+    list-style-position: outside;
+    padding-left: 25px;
+    margin: 0;
+  }
+
+  .footer-column ul li {
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--putih);
+  }
+
+  .footer-column a {
+    color: var(--putih);
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  .footer-column a:hover {
+    text-decoration: underline;
+    color: #ffd700;
+  }
+
+  @media (max-width: 768px) {
+    .footer-container {
+      flex-direction: column;
+      text-align: center;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .footer-column ul {
+      list-style-type: disc;
+      list-style-position: inside;
+      padding-left: 0;
+    }
+  }
+  </style>
+</head>
+<body>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1 class="judul">Ubah Barang<br />Jadi Uang!</h1>
+      <button class="btn-primary">Unggah Barang Sekarang</button>
+    </div>
+  </section>
+
+  <!-- BANNER -->
+  <div class="banner">
+    <div class="banner-track">
+      <div class="banner-content">
+        <img src="Star 3.svg" alt=""><span>ROSOQIN</span><img src="Star 3.svg" alt="">
+        <span>ROSOQIN</span><img src="Star 3.svg" alt=""><span>ROSOQIN</span><img src="Star 3.svg" alt=""><span>ROSOQIN</span><img src="Star 3.svg" alt="">
+        <span>ROSOQIN</span><img src="Star 3.svg" alt=""><span>ROSOQIN</span>
+      </div>
+      <div class="banner-content">
+        <img src="Star 3.svg" alt=""><span>ROSOQIN</span><img src="Star 3.svg" alt="">
+        <span>ROSOQIN</span><img src="Star 3.svg" alt=""><span>ROSOQIN</span><img src="Star 3.svg" alt=""><span>ROSOQIN</span><img src="Star 3.svg" alt="">
+        <span>ROSOQIN</span><img src="Star 3.svg" alt=""><span>ROSOQIN</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARA KERJA -->
+  <section class="steps">
+    <h2>01 - Cara Kerja</h2>
+    <div class="step-container">
+      <div class="step-box">
+        <h3>1</h3>
+        <p>Unggah Barang & Lokasi</p>
+      </div>
+      <div class="step-box">
+        <h3>2</h3>
+        <p>Barang Dijemput & Dinilai</p>
+      </div>
+      <div class="step-box">
+        <h3>3</h3>
+        <p>Terima Uang & Beri Komentar</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATISTIK -->
+  <section class="stats">
+    <h2>02 - Statistik</h2>
+    <div class="stats-container">
+      <div class="stat-box">
+        <h3>2397</h3>
+        <p>Jumlah Barang Daur Ulang</p>
+      </div>
+      <div class="stat-box">
+        <h3>159</h3>
+        <p>Jumlah User Aktif</p>
+      </div>
+      <div class="stat-box">
+        <h3>19,6 Ton</h3>
+        <p>Total Berat Barang</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONI -->
+  <section class="testimoni">
+    <h2>03 - Testimoni</h2>
+    <div class="testi-container">
+      <div class="testi-box">
+        <p>"Sangat membantu untuk mengelola barang bekas!"</p>
+        <h4>– Yuda Angkasa</h4>
+      </div>
+      <div class="testi-box">
+        <p>"Pelayanan cepat dan transparan, recommended!"</p>
+        <h4>– Siti Nurhaliza</h4>
+      </div>
+      <div class="testi-box">
+        <p>"Sekarang barang bekas di rumah jadi bermanfaat."</p>
+        <h4>– Rizwan Wijaya</h4>
+      </div>
+    </div>
+  </section>
+
+  <!-- GABUNG SEKARANG -->
+  <section class="join">
+    <h1 class="judul">Gabung Sekarang</h1>
+    <button class="btn-primary">Daftar Sekarang</button>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer-modern">
+    <div class="footer-container">
+      <div class="footer-column">
+        <h3>Info Alamat</h3>
+        <ul>
+          <li>Saljuan 10/2 Pati</li>
+          <li>Jl. Yudistira 3 Kudoharjo</li>
+          <li>Jl. Minaruga No.3 Kudoharjo</li>
+        </ul>
+      </div>
+      <div class="footer-column">
+        <h3>Contact Person</h3>
+        <ul>
+          <li>081 230 111 567</li>
+          <li>085 225 299 222</li>
+          <li><a href="mailto:grahedukasinusantara@gmail.com">grahedukasinusantara@gmail.com</a></li>
+        </ul>
+      </div>
+      <div class="footer-column kolum3">
+        <h3>Media Sosial</h3>
+        <ul>
+          <li>LPK GEN</li>
+          <li>LPK GEN</li>
+          <li>LPK GEN</li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <!-- SCRIPT GANTI BACKGROUND -->
+  <script>
+    const hero = document.querySelector(".hero");
+    const images = ["bg1.jpg", "bg2.jpg", "bg3.jpg"];
+    let index = 0;
+
+    setInterval(() => {
+      index = (index + 1) % images.length;
+      hero.style.backgroundImage = `url('${images[index]}')`;
+    }, 5000);
+  </script>
+</body>
+</html>

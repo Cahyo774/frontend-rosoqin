@@ -38,7 +38,7 @@ const routes = [
   {
     path: '/product/add',
     name: 'AddProduct',
-    component: () => import('../views/user/AddProduct.vue'),
+    component: () => import('../views/User/AddProduct.vue'),
     meta: { requiresAuth: true, role: 'user' }
   },
   {
@@ -64,7 +64,7 @@ const routes = [
       {
         path: 'product/:id/process',
         name: 'ProcessProduct',
-        component: () => import('../views/admin/ProcessProduct.vue')
+        component: () => import('../views/Admin/ProcessProduct.vue')
       },
       {
         path: 'comments',

@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Rosoqin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --merah: #D00C1C;
+            --hitam: #323232;
+            --putih: #FBF4E8;
+            --abu: #8D8A84;
+        }
+
+        body {
+            background-color: var(--putih);
+            color: var(--hitam);
+            font-family: 'Helvetica', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .judul {
+            font-family: 'Georgia', serif;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background-color: var(--merah);
+            color: var(--putih);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #b00a18;
+        }
+
+        .card {
+            border: 1.5px solid var(--abu);
+            background-color: var(--putih);
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .active-menu {
+            background-color: var(--merah);
+            color: var(--putih);
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 280px 1fr 320px;
+            height: 100vh;
+        }
+
+        .sidebar {
+            background-color: var(--putih);
+            border-right: 1.5px solid var(--abu);
+            overflow-y: auto;
+        }
+
+        .main-content {
+            padding: 20px;
+            overflow-y: auto;
+            background-color: var(--putih);
+        }
+
+        .profile-sidebar {
+            background-color: var(--putih);
+            border-left: 1.5px solid var(--abu);
+            overflow-y: auto;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-container {
+                grid-template-columns: 250px 1fr;
+            }
+            .profile-sidebar {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr;
+            }
+            .sidebar {
+                border-right: none;
+                border-bottom: 1.5px solid var(--abu);
+                height: auto;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar Kiri -->
+        <div class="sidebar">
+            <div class="p-6">
+                <!-- Logo -->
+                <div class="mb-8 text-center">
+                    <h1 class="judul text-2xl text-red-700">ROSOQIN</h1>
+                    <p class="text-gray-600 text-sm mt-1">Ubah Barang Jadi Uang</p>
+                </div>
+
+                <!-- Menu Navigasi -->
+                <div class="space-y-2">
+                    <button class="w-full text-left py-3 px-4 rounded-lg active-menu flex items-center space-x-3" onclick="navigateTo('dashboard')">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </button>
+                    
+                    <button class="w-full text-left py-3 px-4 rounded-lg hover:bg-gray-100 flex items-center space-x-3" onclick="navigateTo('my-products')">
+                        <i class="fas fa-box"></i>
+                        <span>Produk Saya</span>
+                    </button>
+                    
+                    <button class="w-full text-left py-3 px-4 rounded-lg hover:bg-gray-100 flex items-center space-x-3" onclick="navigateTo('add-product')">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Tambah Produk</span>
+                    </button>
+                    
+                    <button class="w-full text-left py-3 px-4 rounded-lg hover:bg-gray-100 flex items-center space-x-3" onclick="navigateTo('comments')">
+                        <i class="fas fa-comments"></i>
+                        <span>Komentar Saya</span>
+                    </button>
+                    
+                    <button class="w-full text-left py-3 px-4 rounded-lg hover:bg-gray-100 flex items-center space-x-3" onclick="navigateTo('statistics')">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Statistik</span>
+                    </button>
+
+                    <button class="w-full text-left py-3 px-4 rounded-lg hover:bg-gray-100 flex items-center space-x-3" onclick="navigateTo('transactions')">
+                        <i class="fas fa-exchange-alt"></i>
+                        <span>Transaksi</span>
+                    </button>
+
+                    <button class="w-full text-left py-3 px-4 rounded-lg hover:bg-gray-100 flex items-center space-x-3" onclick="navigateTo('settings')">
+                        <i class="fas fa-cog"></i>
+                        <span>Pengaturan</span>
+                    </button>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="mt-8 p-4 card rounded-lg">
+                    <h3 class="font-bold mb-3">Statistik Cepat</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span>Produk Aktif:</span>
+                            <span class="font-bold">8</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Komentar:</span>
+                            <span class="font-bold">12</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Penjualan:</span>
+                            <span class="font-bold">5</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Tengah -->
+        <div class="main-content">
+            <!-- Dashboard Page -->
+            <div id="dashboard" class="page active">
+                <div class="mb-6">
+                    <h1 class="text-2xl font-bold">Dashboard Saya</h1>
+                    <p class="text-gray-600">Kelola produk dan aktivitas Anda</p>
+                </div>
+
+                <!-- Statistik -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div class="card p-4 rounded-lg text-center">
+                        <div class="text-green-600 mb-2">
+                            <i class="fas fa-check-circle text-3xl"></i>
+                        </div>
+                        <p class="text-2xl font-bold">8</p>
+                        <p class="text-gray-600">Produk Aktif</p>
+                    </div>
+                    <div class="card p-4 rounded-lg text-center">
+                        <div class="text-yellow-500 mb-2">
+                            <i class="fas fa-pause-circle text-3xl"></i>
+                        </div>
+                        <p class="text-2xl font-bold">4</p>
+                        <p class="text-gray-600">Produk Nonaktif</p>
+                    </div>
+                    <div class="card p-4 rounded-lg text-center">
+                        <div class="text-blue-500 mb-2">
+                            <i class="fas fa-eye text-3xl"></i>
+                        </div>
+                        <p class="text-2xl font-bold">156</p>
+                        <p class="text-gray-600">Total Dilihat</p>
+                    </div>
+                </div>
+
+                <!-- Produk Terbaru -->
+                <div class="card p-6 rounded-lg mb-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-bold">Produk Terbaru</h2>
+                        <button class="text-red-700 hover:text-red-900" onclick="navigateTo('my-products')">
+                            Lihat semua
+                        </button>
+                    </div>
+
+                    <div class="space-y-4">
+                        <!-- Produk 1 -->
+                        <div class="border border-gray-300 rounded-lg p-4">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between">
+                                <div class="flex items-center space-x-4 mb-3 md:mb-0">
+                                    <div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-image text-gray-400"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold">cahyo</h3>
+                                        <p class="text-gray-600 text-sm">Weslanijaksa, Pati, Central Java</p>
+                                        <p class="text-gray-600 text-sm">situtbas</p>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="text-blue-600 hover:text-blue-800 text-sm" onclick="navigateTo('edit-product')">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                    <button class="text-red-600 hover:text-red-800 text-sm" onclick="deleteProduct()">
+                                        <i class="fas fa-trash"></i> Hapus
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Produk 2 -->
+                        <div class="border border-gray-300 rounded-lg p-4">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between">
+                                <div class="flex items-center space-x-4 mb-3 md:mb-0">
+                                    <div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-image text-gray-400"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold">vds</h3>
+                                        <p class="text-gray-600 text-sm">Weslanijaksa, Pati, Central Java</p>
+                                        <p class="text-gray-600 text-sm">dev</p>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="text-blue-600 hover:text-blue-800 text-sm" onclick="navigateTo('edit-product')">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                    <button class="text-red-600 hover:text-red-800 text-sm" onclick="deleteProduct()">
+                                        <i class="fas fa-trash"></i> Hapus
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aktivitas Terbaru -->
+                <div class="card p-6 rounded-lg">
+                    <h2 class="text-xl font-bold mb-6">Aktivitas Terbaru</h2>
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-plus text-green-600 text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm">Anda menambahkan produk baru <span class="font-bold">"Kamera Canon"</span></p>
+                                <p class="text-gray-500 text-xs">2 jam yang lalu</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-comment text-blue-600 text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm">Komentar disetujui pada produk <span class="font-bold">"Laptop Asus"</span></p>
+                                <p class="text-gray-500 text-xs">1 hari yang lalu</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Products Page -->
+            <div id="my-products" class="page">
+                <div class="mb-6">
+                    <h1 class="text-2xl font-bold">Produk Saya</h1>
+                    <p class="text-gray-600">Kelola semua produk Anda</p>
+                </div>
+
+                <div class="card p-6 rounded-lg">
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="flex space-x-2">
+                            <button class="filter-btn active-filter py-1 px-3 rounded" data-filter="all">Semua</button>
+                            <button class="filter-btn bg-gray-200 py-1 px-3 rounded hover:bg-gray-300" data-filter="active">Aktif</button>
+                            <button class="filter-btn bg-gray-200 py-1 px-3 rounded hover:bg-gray-300" data-filter="inactive">Nonaktif</button>
+                        </div>
+                        <button class="btn-primary py-2 px-4 rounded flex items-center space-x-2" onclick="navigateTo('add-product')">
+                            <i class="fas fa-plus"></i>
+                            <span>Tambah Produk</span>
+                        </button>
+                    </div>
+
+                    <div class="space-y-4">
+                        <!-- Produk 1 -->
+                        <div class="product-item border border-gray-300 rounded-lg p-4" data-status="active">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between">
+                                <div class="flex items-center space-x-4 mb-3 md:mb-0">
+                                    <div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-image text-gray-400"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold">cahyo</h3>
+                                        <p class="text-gray-600 text-sm">Weslanijaksa, Pati, Central Java, Java, 59152, Indonesia</p>
+                                        <p class="text-gray-600 text-sm">situtbas</p>
+                                        <button class="text-green-600 hover:text-green-800 text-sm mt-1">
+                                            Lihat selengkapnya
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="text-blue-600 hover:text-blue-800" onclick="navigateTo('edit-product')">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                    <button class="text-red-600 hover:text-red-800" onclick="deleteProduct()">
+                                        <i class="fas fa-trash"></i> Hapus
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Produk 2 -->
+                        <div class="product-item border border-gray-300 rounded-lg p-4" data-status="active">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between">
+                                <div class="flex items-center space-x-4 mb-3 md:mb-0">
+                                    <div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-image text-gray-400"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold">vds</h3>
+                                        <p class="text-gray-600 text-sm">Weslanijaksa, Pati, Central Java, Java, 59152, Indonesia</p>
+                                        <p class="text-gray-600 text-sm">dev</p>
+                                        <button class="text-green-600 hover:text-green-800 text-sm mt-1">
+                                            Lihat selengkapnya
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="text-blue-600 hover:text-blue-800" onclick="navigateTo('edit-product')">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                    <button class="text-red-600 hover:text-red-800" onclick="deleteProduct()">
+                                        <i class="fas fa-trash"></i> Hapus
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Product Page -->
+            <div id="add-product" class="page">
+                <div class="mb-6">
+                    <h1 class="text-2xl font-bold">Tambah Produk Baru</h1>
+                    <p class="text-gray-600">Isi informasi produk Anda</p>
+                </div>
+
+                <div class="card p-6 rounded-lg">
+                    <form id="add-product-form">
+                        <div class="mb-6">
+                            <label class="block text-gray-700 mb-2">Foto Produk</label>
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer" onclick="document.getElementById('product-image').click()">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-2"></i>
+                                <p class="text-gray-600">Klik untuk upload foto produk</p>
+                                <input type="file" class="hidden" id="product-image">
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-gray-700 mb-2">Nama Produk</label>
+                            <input type="text" class="w-full p-3 border border-gray-300 rounded" placeholder="Masukkan nama produk" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-gray-700 mb-2">Deskripsi Produk</label>
+                            <textarea class="w-full p-3 border border-gray-300 rounded h-32" placeholder="Deskripsikan produk Anda..." required></textarea>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-gray-700 mb-2">Harga</label>
+                                <input type="number" class="w-full p-3 border border-gray-300 rounded" placeholder="Contoh: 500000" required>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 mb-2">Kategori</label>
+                                <select class="w-full p-3 border border-gray-300 rounded" required>
+                                    <option value="">Pilih kategori</option>
+                                    <option value="elektronik">Elektronik</option>
+                                    <option value="pakaian">Pakaian</option>
+                                    <option value="rumah-tangga">Rumah Tangga</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="block text-gray-700 mb-2">Lokasi</label>
+                            <input type="text" class="w-full p-3 border border-gray-300 rounded" value="Weslanijaksa, Pati, Central Java, Java, 59152, Indonesia" required>
+                        </div>
+
+                        <div class="flex space-x-3">
+                            <button type="button" class="flex-1 bg-gray-200 py-3 rounded hover:bg-gray-300" onclick="navigateTo('dashboard')">
+                                Batal
+                            </button>
+                            <button type="submit" class="flex-1 btn-primary py-3 rounded">
+                                Tambah Produk
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Edit Product Page -->
+            <div id="edit-product" class="page">
+                <div class="mb-6">
+                    <h1 class="text-2xl font-bold">Edit Produk</h1>
+                    <p class="text-gray-600">Perbarui informasi produk</p>
+                </div>
+
+                <div class="card p-6 rounded-lg">
+                    <form id="edit-product-form">
+                        <div class="mb-6">
+                            <label class="block text-gray-700 mb-2">Foto Produk</label>
+                            <div class="flex space-x-4">
+                                <div class="w-24 h-24 bg-gray-200 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-image text-gray-400"></i>
+                                </div>
+                                <button type="button" class="text-red-700 hover:text-red-900 self-center">
+                                    <i class="fas fa-camera"></i> Ubah Foto
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-gray-700 mb-2">Nama Produk</label>
+                            <input type="text" class="w-full p-3 border border-gray-300 rounded" value="cahyo" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-gray-700 mb-2">Deskripsi Produk</label>
+                            <textarea class="w-full p-3 border border-gray-300 rounded h-32" required>situtbas</textarea>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-gray-700 mb-2">Harga</label>
+                                <input type="number" class="w-full p-3 border border-gray-300 rounded" value="500000" required>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 mb-2">Status</label>
+                                <select class="w-full p-3 border border-gray-300 rounded" required>
+                                    <option value="active" selected>Aktif</option>
+                                    <option value="inactive">Nonaktif</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="block text-gray-700 mb-2">Lokasi</label>
+                            <input type="text" class="w-full p-3 border border-gray-300 rounded" value="Weslanijaksa, Pati, Central Java, Java, 59152, Indonesia" required>
+                        </div>
+
+                        <div class="flex space-x-3">
+                            <button type="button" class="flex-1 bg-gray-200 py-3 rounded hover:bg-gray-300" onclick="navigateTo('my-products')">
+                                Batal
+                            </button>
+                            <button type="submit" class="flex-1 btn-primary py-3 rounded">
+                                Simpan Perubahan
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Comments Page -->
+            <div id="comments" class="page">
+                <div class="mb-6">
+                    <h1 class="text-2xl font-bold">Komentar Saya</h1>
+                    <p class="text-gray-600">Kelola semua komentar Anda</p>
+                </div>
+
+                <div class="card p-6 rounded-lg">
+                    <div class="flex space-x-2 mb-6">
+                        <button class="filter-btn active-filter py-1 px-3 rounded" data-comment-filter="all">Semua</button>
+                        <button class="filter-btn bg-gray-200 py-1 px-3 rounded hover:bg-gray-300" data-comment-filter="approved">Disetujui</button>
+                        <button class="filter-btn bg-gray-200 py-1 px-3 rounded hover:bg-gray-300" data-comment-filter="pending">Menunggu</button>
+                        <button class="filter-btn bg-gray-200 py-1 px-3 rounded hover:bg-gray-300" data-comment-filter="rejected">Ditolak</button>
+                    </div>
+
+                    <div class="space-y-4">
+                        <!-- Komentar 1 -->
+                        <div class="comment-item border border-gray-300 rounded-lg p-4" data-status="approved">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <h3 class="font-bold">Produk: Laptop Asus ROG</h3>
+                                    <p class="text-gray-600 text-sm">12 Mei 2023</p>
+                                </div>
+                                <span class="bg-green-100 text-green-800 text-xs py-1 px-2 rounded">Disetujui</span>
+                            </div>
+                            <p class="mb-3">Produk ini sangat berkualitas, pengiriman cepat dan penjual ramah. Recommended!</p>
+                            <div class="flex space-x-2">
+                                <button class="text-blue-600 hover:text-blue-800 text-sm" onclick="navigateTo('edit-comment')">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                                <button class="text-red-600 hover:text-red-800 text-sm" onclick="deleteComment()">
+                                    <i class="fas fa-trash"></i> Hapus
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Komentar 2 -->
+                        <div class="comment-item border border-gray-300 rounded-lg p-4" data-status="pending">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <h3 class="font-bold">Produk: Kamera Canon EOS</h3>
+                                    <p class="text-gray-600 text-sm">5 April 2023</p>
+                                </div>
+                                <span class="bg-yellow-100 text-yellow-800 text-xs py-1 px-2 rounded">Menunggu</span>
+                            </div>
+                            <p class="mb-3">Kondisi kamera sesuai deskripsi, pengiriman tepat waktu. Terima kasih!</p>
+                            <div class="flex space-x-2">
+                                <button class="text-blue-600 hover:text-blue-800 text-sm" onclick="navigateTo('edit-comment')">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                                <button class="text-red-600 hover:text-red-800 text-sm" onclick="deleteComment()">
+                                    <i class="fas fa-trash"></i> Hapus
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Comment Page -->
+            <div id="edit-comment" class="page">
+                <div class="mb-6">
+                    <h1 class="text-2xl font-bold">Edit Komentar</h1>
+                    <p class="text-gray-600">Perbarui komentar Anda</p>
+                </div>
+
+                <div class="card p-6 rounded-lg">
+                    <form id="edit-comment-form">
+                        <div class="mb-4">
+                            <label class="block text-gray-700 mb-2">Produk</label>
+                            <p class="p-3 bg-gray-100 rounded">Laptop Asus ROG</p>
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="block text-gray-700 mb-2">Komentar</label>
+                            <textarea class="w-full p-3 border border-gray-300 rounded h-32" required>Produk ini sangat berkualitas, pengiriman cepat dan penjual ramah. Recommended!</textarea>
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="block text-gray-700 mb-2">Status</label>
+                            <select class="w-full p-3 border border-gray-300 rounded" required>
+                                <option value="approved" selected>Disetujui</option>
+                                <option value="pending">Menunggu</option>
+                                <option value="rejected">Ditolak</option>
+                            </select>
+                        </div>
+
+                        <div class="flex space-x-3">
+                            <button type="button" class="flex-1 bg-gray-200 py-3 rounded hover:bg-gray-300" onclick="navigateTo('comments')">
+                                Batal
+                            </button>
+                            <button type="submit" class="flex-1 btn-primary py-3 rounded">
+                                Simpan Perubahan
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Edit Profile Page -->
+            <div id="edit-profile" class="page">
+                <div class="mb-6">
+                    <h1 class="text-2xl font-bold">Edit Profil</h1>
+                    <p class="text-gray-600">Perbarui informasi profil Anda</p>
+                </div>
+
+                <div class="card p-6 rounded-lg">
+                    <form id="profile-form">
+                        <div class="mb-6 text-center">
+                            <div class="w-24 h-24 bg-red-700 rounded-full flex items-center justify-center text-white mx-auto mb-4">
+                                <i class="fas fa-user text-3xl"></i>
+                            </div>
+                            <button type="button" class="text-red-700 hover:text-red-900 text-sm">
+                                <i class="fas fa-camera"></i> Ubah Foto Profil
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-gray-700 mb-2">Nama Lengkap</label>
+                                <input type="text" class="w-full p-3 border border-gray-300 rounded" value="Admin" required>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 mb-2">Email</label>
+                                <input type="email" class="w-full p-3 border border-gray-300 rounded" value="admin1@gmail.com" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-gray-700 mb-2">Alamat</label>
+                            <textarea class="w-full p-3 border border-gray-300 rounded h-24">Weslanijaksa, Pati, Central Java, Java, 59152, Indonesia</textarea>
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="block text-gray-700 mb-2">Bio</label>
+                            <textarea class="w-full p-3 border border-gray-300 rounded h-24" placeholder="Tulis bio singkat tentang Anda..."></textarea>
+                        </div>
+
+                        <div class="flex space-x-3">
+                            <button type="button" class="flex-1 bg-gray-200 py-3 rounded hover:bg-gray-300" onclick="navigateTo('dashboard')">
+                                Batal
+                            </button>
+                            <button type="submit" class="flex-1 btn-primary py-3 rounded">
+                                Simpan Perubahan
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Statistics Page -->
+            <div id="statistics" class="page">
+                <div class="mb-6">
+                    <h1 class="text-2xl font-bold">Statistik</h1>
+                    <p class="text-gray-600">Lihat statistik aktivitas Anda</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="card p-6 rounded-lg">
+                        <h3 class="text-lg font-bold mb-4">Aktivitas Bulan Ini</h3>
+                        <div class="space-y-4">
+                            <div class="flex justify-between">
+                                <span>Produk Ditambahkan</span>
+                                <span class="font-bold">5</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Komentar Ditulis</span>
+                                <span class="font-bold">12</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Produk Terjual</span>
+                                <span class="font-bold">3</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card p-6 rounded-lg">
+                        <h3 class="text-lg font-bold mb-4">Ringkasan</h3>
+                        <div class="space-y-4">
+                            <div class="flex justify-between">
+                                <span>Total Produk</span>
+                                <span class="font-bold">15</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Produk Aktif</span>
+                                <span class="font-bold">8</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Total Dilihat</span>
+                                <span class="font-bold">156</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transactions Page -->
+            <div id="transactions" class="page">
+                <div class="mb-6">
+                    <h1 class="text-2xl font-bold">Transaksi</h1>
+                    <p class="text-gray-600">Riwayat transaksi Anda</p>
+                </div>
+
+                <div class="card p-6 rounded-lg">
+                    <div class="space-y-4">
+                        <div class="border border-gray-300 rounded-lg p-4">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h3 class="font-bold">Laptop Asus ROG</h3>
+                                    <p class="text-gray-600 text-sm">12 Mei 2023</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-bold text-green-600">Rp 8.500.000</p>
+                                    <span class="bg-green-100 text-green-800 text-xs py-1 px-2 rounded">Selesai</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Page -->
+            <div id="settings" class="page">
+                <div class="mb-6">
+                    <h1 class="text-2xl font-bold">Pengaturan</h1>
+                    <p class="text-gray-600">Kelola pengaturan akun Anda</p>
+                </div>
+
+                <div class="card p-6 rounded-lg">
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="font-bold mb-3">Notifikasi</h3>
+                            <div class="space-y-2">
+                                <label class="flex items-center space-x-3">
+                                    <input type="checkbox" class="rounded" checked>
+                                    <span>Email notifikasi</span>
+                                </label>
+                                <label class="flex items-center space-x-3">
+                                    <input type="checkbox" class="rounded" checked>
+                                    <span>Notifikasi komentar</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="font-bold mb-3">Privasi</h3>
+                            <div class="space-y-2">
+                                <label class="flex items-center space-x-3">
+                                    <input type="checkbox" class="rounded">
+                                    <span>Sembunyikan profil dari pencarian</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button class="w-full btn-primary py-3 rounded">
+                            Simpan Pengaturan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Kanan - Profil -->
+        <div class="profile-sidebar">
+            <div class="p-6">
+                <!-- Profil Section -->
+                <div class="text-center mb-8">
+                    <div class="w-24 h-24 bg-red-700 rounded-full flex items-center justify-center text-white mx-auto mb-4">
+                        <i class="fas fa-user text-3xl"></i>
+                    </div>
+                    <h2 class="text-xl font-bold">Admin</h2>
+                    <p class="text-gray-600">admin1@gmail.com</p>
+                    <button class="text-red-700 hover:text-red-900 text-sm mt-2" onclick="navigateTo('edit-profile')">
+                        <i class="fas fa-edit"></i> Edit Profil
+                    </button>
+                </div>
+
+                <!-- Statistik Profil -->
+                <div class="card p-4 rounded-lg mb-6">
+                    <h3 class="font-bold mb-3">Statistik Profil</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">Member sejak</span>
+                            <span class="font-bold text-sm">Jan 2023</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">Rating</span>
+                            <span class="font-bold text-sm">4.8/5</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">Response Time</span>
+                            <span class="font-bold text-sm">2 jam</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aktivitas Cepat -->
+                <div class="card p-4 rounded-lg mb-6">
+                    <h3 class="font-bold mb-3">Aktivitas Cepat</h3>
+                    <div class="space-y-2">
+                        <button class="w-full text-left py-2 px-3 rounded hover:bg-gray-100 flex items-center space-x-2 text-sm">
+                            <i class="fas fa-bell text-gray-500"></i>
+                            <span>Notifikasi (3)</span>
+                        </button>
+                        <button class="w-full text-left py-2 px-3 rounded hover:bg-gray-100 flex items-center space-x-2 text-sm">
+                            <i class="fas fa-envelope text-gray-500"></i>
+                            <span>Pesan (5)</span>
+                        </button>
+                        <button class="w-full text-left py-2 px-3 rounded hover:bg-gray-100 flex items-center space-x-2 text-sm">
+                            <i class="fas fa-heart text-gray-500"></i>
+                            <span>Favorit (12)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Info Kontak -->
+                <div class="card p-4 rounded-lg">
+                    <h3 class="font-bold mb-3">Info Kontak</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-map-marker-alt text-gray-500"></i>
+                            <span>Pati, Jawa Tengah</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-phone text-gray-500"></i>
+                            <span>0812 3456 7890</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-clock text-gray-500"></i>
+                            <span>Aktif 2 jam lalu</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Navigation function
+        function navigateTo(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show target page
+            document.getElementById(pageId).classList.add('active');
+            
+            // Update active menu
+            document.querySelectorAll('.sidebar button').forEach(btn => {
+                btn.classList.remove('active-menu');
+            });
+            
+            // Set active menu based on page
+            const menuMap = {
+                'dashboard': 0,
+                'my-products': 1,
+                'add-product': 2,
+                'comments': 3,
+                'statistics': 4,
+                'transactions': 5,
+                'settings': 6
+            };
+            
+            const menuIndex = menuMap[pageId];
+            if (menuIndex !== undefined) {
+                const menuButtons = document.querySelectorAll('.sidebar button');
+                menuButtons[menuIndex].classList.add('active-menu');
+            }
+            
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+
+        // Initialize filters and form handlers
+        document.addEventListener('DOMContentLoaded', function() {
+            // Product filters
+            const filterButtons = document.querySelectorAll('.filter-btn[data-filter]');
+            const productItems = document.querySelectorAll('.product-item');
+            
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const filter = this.getAttribute('data-filter');
+                    
+                    // Update active button
+                    filterButtons.forEach(btn => {
+                        btn.classList.remove('active-filter');
+                        btn.classList.add('bg-gray-200');
+                    });
+                    this.classList.remove('bg-gray-200');
+                    this.classList.add('active-filter');
+                    
+                    // Filter products
+                    productItems.forEach(item => {
+                        if (filter === 'all' || item.getAttribute('data-status') === filter) {
+                            item.style.display = 'block';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            });
+
+            // Comment filters
+            const commentFilterButtons = document.querySelectorAll('.filter-btn[data-comment-filter]');
+            const commentItems = document.querySelectorAll('.comment-item');
+            
+            commentFilterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const filter = this.getAttribute('data-comment-filter');
+                    
+                    // Update active button
+                    commentFilterButtons.forEach(btn => {
+                        btn.classList.remove('active-filter');
+                        btn.classList.add('bg-gray-200');
+                    });
+                    this.classList.remove('bg-gray-200');
+                    this.classList.add('active-filter');
+                    
+                    // Filter comments
+                    commentItems.forEach(item => {
+                        if (filter === 'all' || item.getAttribute('data-status') === filter) {
+                            item.style.display = 'block';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            });
+
+            // Form submissions
+            document.getElementById('profile-form')?.addEventListener('submit', function(e) {
+                e.preventDefault();
+                alert('Profil berhasil diperbarui!');
+                navigateTo('dashboard');
+            });
+
+            document.getElementById('add-product-form')?.addEventListener('submit', function(e) {
+                e.preventDefault();
+                alert('Produk berhasil ditambahkan!');
+                navigateTo('my-products');
+            });
+
+            document.getElementById('edit-product-form')?.addEventListener('submit', function(e) {
+                e.preventDefault();
+                alert('Produk berhasil diperbarui!');
+                navigateTo('my-products');
+            });
+
+            document.getElementById('edit-comment-form')?.addEventListener('submit', function(e) {
+                e.preventDefault();
+                alert('Komentar berhasil diperbarui!');
+                navigateTo('comments');
+            });
+        });
+
+        function deleteProduct() {
+            if (confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
+                alert('Produk berhasil dihapus!');
+                // In a real app, you would make an API call here
+            }
+        }
+
+        function deleteComment() {
+            if (confirm('Apakah Anda yakin ingin menghapus komentar ini?')) {
+                alert('Komentar berhasil dihapus!');
+                // In a real app, you would make an API call here
+            }
+        }
+    </script>
+</body>
+</html>

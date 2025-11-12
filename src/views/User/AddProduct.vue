@@ -57,14 +57,28 @@
             ></textarea>
           </div>
 
+          <!-- Jenis Barang Bekas - Pill Style -->
           <div class="inp">
-            <label for="category">Jenis Barang Bekas *</label>
-            <select v-model="productData.category" id="category" required>
-              <option value="">Pilih Jenis Barang</option>
-              <option v-for="category in categories" :key="category.id" :value="category.id">
-                {{ category.name }}
-              </option>
-            </select>
+            <label>Jenis Barang Bekas *</label>
+            <div class="category-pills">
+              <button
+                v-for="category in categories"
+                :key="category.id"
+                type="button"
+                class="category-pill"
+                :class="{ active: productData.category === category.id }"
+                @click="selectCategory(category.id)"
+              >
+                <span class="pill-icon">
+                  <HeroIcon :icon="getCategoryIcon(category.id)" size="sm" />
+                </span>
+                <span class="pill-text">{{ category.name }}</span>
+              </button>
+            </div>
+            <div class="category-validation" v-if="!productData.category">
+              <HeroIcon icon="exclamation" size="xs" color="warning" />
+              <span>Pilih salah satu jenis barang bekas</span>
+            </div>
           </div>
         </div>
 
@@ -112,11 +126,11 @@
             </div>
 
             <!-- Koordinat yang Dipilih -->
-            <div class="coordinates-info" v-if="validateCoordinates(productData.latitude, productData.longitude)">
+            <div class="coordinates-info" v-if="hasValidCoordinates">
               <HeroIcon icon="check-circle" size="sm" color="success" />
               <span>
                 Koordinat terpilih: 
-                <strong>{{ productData.latitude.toFixed(6) }}, {{ productData.longitude.toFixed(6) }}</strong>
+                <strong>{{ formattedLatitude }}, {{ formattedLongitude }}</strong>
               </span>
               <button 
                 type="button" 
@@ -136,29 +150,25 @@
               </span>
             </div>
 
-            <!-- Peta -->
-            <div class="map-container" v-show="showMap">
-              <div class="map-header">
-                <h4>Pilih Lokasi di Peta</h4>
-                <div class="map-actions">
-                  <button type="button" @click="resetMap" class="btn small secondary">
-                    <HeroIcon icon="arrow-path" size="xs" />
-                    Reset
-                  </button>
-                  <button type="button" @click="showMap = false" class="btn small second">
-                    <HeroIcon icon="x-mark" size="xs" />
-                    Tutup
-                  </button>
-                </div>
-              </div>
-              <div id="map" ref="mapElement"></div>
+              
+              <MapView
+                v-if="showMap"
+                :key="mapKey"
+                :title="productData.title || 'Lokasi Penjemputan'"
+                :address="productData.address"
+                :latitude="productData.latitude"
+                :longitude="productData.longitude"
+                :selectable="true"
+                @location-selected="onLocationSelected"
+                class="selectable-map"
+              />
+              
               <div class="map-instruction">
                 <HeroIcon icon="information-circle" size="sm" color="primary" />
                 <span>Klik di peta untuk memilih lokasi penjemputan</span>
               </div>
             </div>
           </div>
-        </div>
 
         <!-- Validation Summary -->
         <div class="validation-summary" v-if="!isFormValid">
@@ -188,425 +198,29 @@
   </div>
 </template>
 
-<!-- <script>
-import { ref, reactive, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
-import { useToast } from 'vue-toastification'
-import api from '../../service/api'
-import HeroIcon from '../../components/HeroIcon.vue'
-
-export default {
-  name: 'AddProduct',
-  components: {
-    HeroIcon
-  },
-  setup() {
-    const router = useRouter()
-    const toast = useToast()
-    const fileInput = ref(null)
-    const mapElement = ref(null)
-    
-    const loading = ref(false)
-    const showMap = ref(false)
-    const mapInitialized = ref(false)
-    
-    const categories = ref([
-      { id: 1, name: 'Kardus' },
-      { id: 2, name: 'Plastik' },
-      { id: 3, name: 'Kertas' },
-      { id: 4, name: 'Logam' },
-      { id: 5, name: 'Elektronik' },
-      { id: 6, name: 'Kaca' },
-      { id: 7, name: 'Tekstil' },
-      { id: 8, name: 'Lainnya' }
-    ])
-
-    const productData = reactive({
-      title: '',
-      description: '',
-      category_id: '',
-      address: '',
-      latitude: null,
-      longitude: null,
-      photo: null,
-      photoPreview: null
-    })
-
-    let map = null
-    let marker = null
-
-    // Computed property untuk validasi form
-    const isFormValid = computed(() => {
-      return (
-        productData.photo &&
-        productData.title.trim() &&
-        productData.description.trim() &&
-        productData.category_id &&
-        productData.address.trim() &&
-        productData.latitude &&
-        productData.longitude
-      )
-    })
-
-    const triggerFileInput = () => {
-      fileInput.value?.click()
-    }
-
-    const handleFileUpload = (event) => {
-      const file = event.target.files[0]
-      if (file) {
-        if (file.size > 2 * 1024 * 1024) {
-          toast.error('Ukuran file maksimal 2MB')
-          return
-        }
-
-        if (!file.type.startsWith('image/')) {
-          toast.error('File harus berupa gambar (JPG, PNG)')
-          return
-        }
-
-        productData.photo = file
-        productData.photoPreview = URL.createObjectURL(file)
-        toast.success('Foto berhasil diunggah')
-      }
-    }
-
-    const removeImage = () => {
-      productData.photo = null
-      productData.photoPreview = null
-      if (fileInput.value) {
-        fileInput.value.value = ''
-      }
-      toast.info('Foto dihapus')
-    }
-
-    const initMap = async () => {
-      if (mapInitialized.value) {
-        console.log('Peta sudah diinisialisasi')
-        return
-      }
-
-      try {
-        console.log('Memulai inisialisasi peta...')
-        
-        // Tunggu hingga DOM siap
-        await nextTick()
-        
-        if (!mapElement.value) {
-          console.error('Element peta tidak ditemukan')
-          toast.error('Element peta tidak tersedia')
-          return
-        }
-
-        console.log('Element peta ditemukan, mengimpor Leaflet...')
-        
-        // Import Leaflet
-        const L = await import('leaflet')
-        console.log('Leaflet berhasil diimpor')
-        
-        // Fix untuk marker icons - cara yang lebih reliable
-        try {
-          delete L.Icon.Default.prototype._getIconUrl
-          L.Icon.Default.mergeOptions({
-            iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
-            iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
-            shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
-          })
-        } catch (iconError) {
-          console.warn('Error setting marker icons:', iconError)
-        }
-
-        // Default coordinates - Jakarta
-        const defaultLat = -6.2088
-        const defaultLng = 106.8456
-        
-        console.log('Membuat instance peta...')
-        
-        // Create map instance
-        map = L.map(mapElement.value, {
-          center: [defaultLat, defaultLng],
-          zoom: 13
-        })
-
-        console.log('Instance peta dibuat, menambahkan tile layer...')
-
-        // Add tile layer dengan error handling
-        const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '© OpenStreetMap contributors',
-          maxZoom: 19,
-          errorTileUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
-        }).addTo(map)
-
-        // Event untuk tile errors
-        tileLayer.on('tileerror', function(error) {
-          console.error('Tile error:', error)
-        })
-
-        console.log('Tile layer ditambahkan, membuat marker...')
-
-        // Create marker
-        marker = L.marker([defaultLat, defaultLng], {
-          draggable: true
-        }).addTo(map)
-
-        // Set initial coordinates
-        productData.latitude = defaultLat
-        productData.longitude = defaultLng
-
-        console.log('Marker dibuat, menambahkan event listeners...')
-
-        // Marker drag event
-        marker.on('dragend', function(event) {
-          const position = event.target.getLatLng()
-          console.log('Marker dipindah ke:', position.lat, position.lng)
-          updateCoordinates(position.lat, position.lng)
-        })
-
-        // Map click event
-        map.on('click', function(event) {
-          console.log('Peta diklik di:', event.latlng.lat, event.latlng.lng)
-          marker.setLatLng(event.latlng)
-          updateCoordinates(event.latlng.lat, event.latlng.lng)
-        })
-
-        // Map load event
-        map.whenReady(function() {
-          console.log('Peta berhasil dimuat')
-          mapInitialized.value = true
-          toast.success('Peta siap digunakan')
-        })
-
-        // Force map refresh setelah delay kecil
-        setTimeout(() => {
-          if (map) {
-            map.invalidateSize()
-            console.log('Map size invalidated')
-          }
-        }, 100)
-
-      } catch (error) {
-        console.error('Error inisialisasi peta:', error)
-        toast.error('Gagal memuat peta: ' + error.message)
-      }
-    }
-
-    const updateCoordinates = (lat, lng) => {
-      productData.latitude = lat
-      productData.longitude = lng
-      console.log('Koordinat diperbarui:', lat, lng)
-      
-      // Update address dari koordinat
-      updateAddressFromCoordinates(lat, lng)
-    }
-
-    const toggleMap = () => {
-      showMap.value = !showMap.value
-      if (showMap.value) {
-        // Tunggu sebentar untuk memastikan DOM sudah ter-render
-        setTimeout(() => {
-          initMap()
-        }, 300)
-      }
-    }
-
-    const resetMap = () => {
-      if (map && marker) {
-        const defaultLat = -6.2088
-        const defaultLng = 106.8456
-        map.setView([defaultLat, defaultLng], 13)
-        marker.setLatLng([defaultLat, defaultLng])
-        updateCoordinates(defaultLat, defaultLng)
-        toast.info('Peta direset ke lokasi default')
-      }
-    }
-
-    const getCurrentLocation = () => {
-      if (!navigator.geolocation) {
-        toast.error('Browser tidak mendukung geolocation')
-        return
-      }
-
-      loading.value = true
-      toast.info('Mendeteksi lokasi Anda...')
-
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const lat = position.coords.latitude
-          const lng = position.coords.longitude
-          
-          console.log('Lokasi saat ini:', lat, lng)
-          
-          productData.latitude = lat
-          productData.longitude = lng
-          
-          // Update map jika sudah diinisialisasi
-          if (map && marker) {
-            map.setView([lat, lng], 15)
-            marker.setLatLng([lat, lng])
-          } else {
-            // Jika map belum tampil, tampilkan dulu
-            showMap.value = true
-            setTimeout(() => {
-              if (map && marker) {
-                map.setView([lat, lng], 15)
-                marker.setLatLng([lat, lng])
-              }
-            }, 500)
-          }
-          
-          updateAddressFromCoordinates(lat, lng)
-          loading.value = false
-          toast.success('Lokasi berhasil didapatkan')
-        },
-        (error) => {
-          console.error('Error geolocation:', error)
-          let errorMessage = 'Gagal mendapatkan lokasi'
-          
-          switch(error.code) {
-            case error.PERMISSION_DENIED:
-              errorMessage = 'Izin lokasi ditolak. Izinkan akses lokasi di browser Anda.'
-              break
-            case error.POSITION_UNAVAILABLE:
-              errorMessage = 'Informasi lokasi tidak tersedia'
-              break
-            case error.TIMEOUT:
-              errorMessage = 'Timeout saat mengambil lokasi'
-              break
-          }
-          
-          toast.error(errorMessage)
-          loading.value = false
-        },
-        {
-          timeout: 10000,
-          enableHighAccuracy: true
-        }
-      )
-    }
-
-    const updateAddressFromCoordinates = async (lat, lng) => {
-      try {
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
-        )
-        if (!response.ok) throw new Error('Network response was not ok')
-        
-        const data = await response.json()
-        
-        if (data && data.display_name) {
-          productData.address = data.display_name
-          console.log('Alamat otomatis:', data.display_name)
-        }
-      } catch (error) {
-        console.warn('Tidak bisa mendapatkan alamat otomatis:', error)
-        // User bisa manual input alamat
-      }
-    }
-
-    // Watch untuk perubahan showMap
-    watch(showMap, (newVal) => {
-      if (newVal && !mapInitialized.value) {
-        console.log('ShowMap berubah menjadi true, inisialisasi peta...')
-        setTimeout(initMap, 100)
-      }
-    })
-
-    const submitProduct = async () => {
-      if (!isFormValid.value) {
-        toast.error('Harap lengkapi semua field yang wajib diisi')
-        return
-      }
-
-      try {
-        loading.value = true
-
-        const formData = new FormData()
-        
-        formData.append('title', productData.title.trim())
-        formData.append('description', productData.description.trim())
-        formData.append('category_id', productData.category_id)
-        formData.append('address', productData.address.trim())
-        formData.append('latitude', productData.latitude.toString())
-        formData.append('longitude', productData.longitude.toString())
-        formData.append('photo', productData.photo)
-        formData.append('status', 'available')
-
-        console.log('Mengirim data:', {
-          title: productData.title,
-          address: productData.address,
-          latitude: productData.latitude,
-          longitude: productData.longitude
-        })
-
-        const response = await api.post('/produks', formData, {
-          headers: { 
-            'Content-Type': 'multipart/form-data',
-          }
-        })
-
-        console.log('Response:', response.data)
-        toast.success('Produk berhasil ditambahkan!')
-        router.push('/user-dashboard')
-        
-      } catch (error) {
-        console.error('Error:', error)
-        toast.error(error.response?.data?.message || 'Gagal menambahkan produk')
-      } finally {
-        loading.value = false
-      }
-    }
-
-    onUnmounted(() => {
-      if (map) {
-        map.remove()
-        map = null
-      }
-      mapInitialized.value = false
-    })
-
-    return {
-      fileInput,
-      mapElement,
-      loading,
-      showMap,
-      categories,
-      productData,
-      isFormValid,
-      triggerFileInput,
-      handleFileUpload,
-      removeImage,
-      getCurrentLocation,
-      toggleMap,
-      resetMap,
-      submitProduct
-    }
-  }
-}
-</script> -->
-
-
 <script>
-import { ref, reactive, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
+import { ref, reactive, computed, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
-import api from '../../service/api'
-import HeroIcon from '../../components/HeroIcon.vue'
+// import api from '@/service/api'
+import HeroIcon from '@/components/HeroIcon.vue'
+import MapView from '@/components/MapView.vue'
 
 export default {
   name: 'AddProduct',
   components: {
-    HeroIcon
+    HeroIcon,
+    MapView
   },
   setup() {
     const router = useRouter()
     const toast = useToast()
     const fileInput = ref(null)
-    const mapElement = ref(null)
     
     const loading = ref(false)
     const showMap = ref(false)
-    const mapInitialized = ref(false)
     const isGettingLocation = ref(false)
+    const mapKey = ref(0)
     
     const categories = ref([
       { id: 'Kardus', name: 'Kardus' },
@@ -630,10 +244,21 @@ export default {
       photoPreview: null
     })
 
-    let map = null
-    let marker = null
+    // Computed properties
+    const hasValidCoordinates = computed(() => {
+      return validateCoordinates(productData.latitude, productData.longitude)
+    })
 
-    // Computed property untuk validasi form
+    const formattedLatitude = computed(() => {
+      if (!hasValidCoordinates.value) return 'N/A'
+      return productData.latitude.toFixed(6)
+    })
+
+    const formattedLongitude = computed(() => {
+      if (!hasValidCoordinates.value) return 'N/A'
+      return productData.longitude.toFixed(6)
+    })
+
     const isFormValid = computed(() => {
       return (
         productData.photo &&
@@ -641,12 +266,11 @@ export default {
         productData.description.trim() &&
         productData.category &&
         productData.address.trim() &&
-        productData.latitude &&
-        productData.longitude
+        hasValidCoordinates.value
       )
     })
 
-    // Validasi koordinat
+    // Methods
     const validateCoordinates = (lat, lng) => {
       return (
         lat !== null && 
@@ -656,6 +280,24 @@ export default {
         lat >= -90 && lat <= 90 &&
         lng >= -180 && lng <= 180
       )
+    }
+
+    const getCategoryIcon = (categoryId) => {
+      const iconMap = {
+        'Kardus': 'box',
+        'Plastik': 'cube',
+        'Kertas': 'document',
+        'Logam': 'wrench',
+        'Elektronik': 'computer',
+        'Kaca': 'window',
+        'Tekstil': 'shirt',
+        'Lainnya': 'question-mark'
+      }
+      return iconMap[categoryId] || 'question-mark'
+    }
+
+    const selectCategory = (categoryId) => {
+      productData.category = categoryId
     }
 
     const triggerFileInput = () => {
@@ -690,130 +332,24 @@ export default {
       toast.info('Foto dihapus')
     }
 
-    // ✅ SOLUSI SEDERHANA: Inisialisasi map dengan approach yang berbeda
-    const initMap = async () => {
-      // Jika map sudah diinisialisasi, cukup refresh size
-      if (mapInitialized.value && map) {
-        setTimeout(() => {
-          if (map) map.invalidateSize(true)
-        }, 100)
-        return
-      }
-
-      try {
-        console.log('🗺️ Inisialisasi peta...')
-        
-        // Tunggu DOM siap
-        await nextTick()
-        
-        if (!mapElement.value) {
-          console.error('Element peta tidak ditemukan')
-          return
-        }
-
-        // Hapus map lama jika ada
-        if (map) {
-          map.remove()
-          map = null
-        }
-
-        // Import Leaflet
-        const L = await import('leaflet')
-        
-        // Fix marker icons
-        delete L.Icon.Default.prototype._getIconUrl
-        L.Icon.Default.mergeOptions({
-          iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
-          iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
-          shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
-        })
-
-        // Gunakan koordinat yang ada atau default
-        const initialLat = productData.latitude || -6.2088
-        const initialLng = productData.longitude || 106.8456
-
-        // Buat map instance - TANPA DELAY, langsung buat
-        map = L.map(mapElement.value).setView([initialLat, initialLng], 13)
-
-        // Tambahkan tile layer
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '© OpenStreetMap contributors',
-          maxZoom: 19,
-        }).addTo(map)
-
-        // Buat marker
-        marker = L.marker([initialLat, initialLng], {
-          draggable: true
-        }).addTo(map)
-
-        // Event handlers
-        marker.on('dragend', (event) => {
-          const position = event.target.getLatLng()
-          updateCoordinates(position.lat, position.lng)
-        })
-
-        map.on('click', (event) => {
-          marker.setLatLng(event.latlng)
-          updateCoordinates(event.latlng.lat, event.latlng.lng)
-        })
-
-        // ✅ KEY FIX: Refresh size beberapa kali dengan interval
-        const refreshMap = () => {
-          if (map) {
-            map.invalidateSize(true)
-          }
-        }
-
-        // Multiple refreshes untuk memastikan
-        refreshMap()
-        setTimeout(refreshMap, 200)
-        setTimeout(refreshMap, 500)
-        setTimeout(refreshMap, 1000)
-
-        mapInitialized.value = true
-        console.log('✅ Peta berhasil diinisialisasi')
-        
-      } catch (error) {
-        console.error('❌ Error inisialisasi peta:', error)
-        toast.error('Gagal memuat peta')
-      }
-    }
-
-    const updateCoordinates = async (lat, lng) => {
-      if (!validateCoordinates(lat, lng)) return
-
-      productData.latitude = lat
-      productData.longitude = lng
-      
-      // Update address
-      await updateAddressFromCoordinates(lat, lng)
-    }
-
+    // Location methods
     const toggleMap = () => {
       showMap.value = !showMap.value
       if (showMap.value) {
-        // Tunggu sebentar lalu inisialisasi
-        setTimeout(() => {
-          initMap()
-        }, 50)
+        mapKey.value += 1 // Force re-render map
       }
     }
 
     const resetMap = () => {
-      if (map && marker) {
-        const defaultLat = -6.2088
-        const defaultLng = 106.8456
-        
-        map.setView([defaultLat, defaultLng], 13)
-        marker.setLatLng([defaultLat, defaultLng])
-        updateCoordinates(defaultLat, defaultLng)
-        
-        setTimeout(() => {
-          if (map) map.invalidateSize(true)
-        }, 200)
-        
-        toast.info('Peta direset ke lokasi default')
-      }
+      // Reset ke koordinat default Jakarta
+      const defaultLat = -6.2088
+      const defaultLng = 106.8456
+      
+      productData.latitude = defaultLat
+      productData.longitude = defaultLng
+      mapKey.value += 1 // Force re-render map
+      
+      toast.info('Peta direset ke lokasi default')
     }
 
     const getCurrentLocation = async () => {
@@ -825,7 +361,6 @@ export default {
       if (isGettingLocation.value) return
 
       isGettingLocation.value = true
-      loading.value = true
       toast.info('Mendeteksi lokasi Anda...')
 
       try {
@@ -843,26 +378,17 @@ export default {
           throw new Error('Koordinat tidak valid')
         }
         
-        await updateCoordinates(lat, lng)
+        // Update coordinates
+        productData.latitude = lat
+        productData.longitude = lng
         
-        // Tampilkan peta jika belum tampil
+        // Update address from coordinates
+        await updateAddressFromCoordinates(lat, lng)
+        
+        // Show map if not already shown
         if (!showMap.value) {
           showMap.value = true
-          setTimeout(() => {
-            initMap().then(() => {
-              if (map && marker) {
-                map.setView([lat, lng], 15)
-                marker.setLatLng([lat, lng])
-                setTimeout(() => map.invalidateSize(true), 300)
-              }
-            })
-          }, 100)
-        } else {
-          if (map && marker) {
-            map.setView([lat, lng], 15)
-            marker.setLatLng([lat, lng])
-            setTimeout(() => map.invalidateSize(true), 200)
-          }
+          mapKey.value += 1
         }
         
         toast.success('Lokasi berhasil didapatkan!')
@@ -873,7 +399,7 @@ export default {
         
         switch(error.code) {
           case 1:
-            errorMessage = 'Izin lokasi ditolak'
+            errorMessage = 'Izin lokasi ditolak. Izinkan akses lokasi di browser Anda.'
             break
           case 2:
             errorMessage = 'Informasi lokasi tidak tersedia'
@@ -885,7 +411,6 @@ export default {
         
         toast.error(errorMessage)
       } finally {
-        loading.value = false
         isGettingLocation.value = false
       }
     }
@@ -915,13 +440,24 @@ export default {
       }
     }
 
+    const onLocationSelected = (location) => {
+      console.log('📍 Lokasi dipilih dari peta:', location)
+      productData.latitude = location.latitude
+      productData.longitude = location.longitude
+      
+      // Update address jika tidak ada alamat yang diisi manual
+      if (!productData.address || productData.address.startsWith('Lokasi di')) {
+        updateAddressFromCoordinates(location.latitude, location.longitude)
+      }
+    }
+
     const copyCoordinates = async () => {
-      if (!validateCoordinates(productData.latitude, productData.longitude)) {
+      if (!hasValidCoordinates.value) {
         toast.error('Tidak ada koordinat untuk disalin')
         return
       }
       
-      const coords = `${productData.latitude.toFixed(6)}, ${productData.longitude.toFixed(6)}`
+      const coords = `${formattedLatitude.value}, ${formattedLongitude.value}`
       try {
         await navigator.clipboard.writeText(coords)
         toast.success('Koordinat berhasil disalin!')
@@ -941,41 +477,7 @@ export default {
       console.log('Alamat diinput manual:', productData.address)
     }
 
-    // Watch sederhana untuk showMap
-    watch(showMap, (newVal) => {
-      if (newVal && !mapInitialized.value) {
-        setTimeout(() => {
-          initMap()
-        }, 100)
-      } else if (newVal && map) {
-        setTimeout(() => {
-          map.invalidateSize(true)
-        }, 200)
-      }
-    })
-
-    // Handle window resize
-    onMounted(() => {
-      const handleResize = () => {
-        if (map && showMap.value) {
-          setTimeout(() => {
-            map.invalidateSize(true)
-          }, 100)
-        }
-      }
-      
-      window.addEventListener('resize', handleResize)
-      
-      onUnmounted(() => {
-        window.removeEventListener('resize', handleResize)
-        if (map) {
-          map.remove()
-          map = null
-        }
-        mapInitialized.value = false
-      })
-    })
-
+    // Form validation
     const validateForm = () => {
       const errors = []
       if (!productData.photo) errors.push('Foto produk wajib diunggah')
@@ -983,7 +485,7 @@ export default {
       if (!productData.description.trim()) errors.push('Deskripsi produk wajib diisi')
       if (!productData.category) errors.push('Kategori produk wajib dipilih')
       if (!productData.address.trim()) errors.push('Alamat wajib diisi')
-      if (!validateCoordinates(productData.latitude, productData.longitude)) {
+      if (!hasValidCoordinates.value) {
         errors.push('Koordinat lokasi tidak valid')
       }
       return errors
@@ -1048,21 +550,23 @@ export default {
     }
 
     onUnmounted(() => {
-      if (map) {
-        map.remove()
-        map = null
-      }
+      // Cleanup jika diperlukan
     })
 
     return {
       fileInput,
-      mapElement,
       loading,
       showMap,
       isGettingLocation,
       categories,
       productData,
       isFormValid,
+      hasValidCoordinates,
+      formattedLatitude,
+      formattedLongitude,
+      mapKey,
+      getCategoryIcon,
+      selectCategory,
       triggerFileInput,
       handleFileUpload,
       removeImage,
@@ -1072,12 +576,11 @@ export default {
       submitProduct,
       copyCoordinates,
       onAddressManualInput,
-      validateCoordinates: () => validateCoordinates(productData.latitude, productData.longitude)
+      onLocationSelected
     }
   }
 }
 </script>
-
 
 <style scoped>
 .add-product-container {
@@ -1257,8 +760,7 @@ export default {
 }
 
 .inp input,
-.inp textarea,
-.inp select {
+.inp textarea {
   background-color: white;
   padding: 1vh 2vh;
   border: 1px solid #bbbbbb;
@@ -1275,10 +777,69 @@ export default {
 }
 
 .inp input:focus,
-.inp textarea:focus,
-.inp select:focus {
+.inp textarea:focus {
   border-color: #757575;
   outline: none;
+}
+
+/* Category Pills */
+.category-pills {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1vh;
+  margin-top: 1vh;
+}
+
+.category-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5vh;
+  padding: 1.5vh 1vh;
+  border: 2px solid #e0e0e0;
+  border-radius: 2vh;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.category-pill:hover {
+  border-color: #D00C1C;
+  transform: translateY(-2px);
+}
+
+.category-pill.active {
+  border-color: #D00C1C;
+  background: #D00C1C;
+  color: white;
+}
+
+.category-pill.active .pill-icon {
+  color: white;
+}
+
+.pill-icon {
+  color: #666;
+  transition: color 0.3s ease;
+}
+
+.pill-text {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.category-validation {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: #fff3e0;
+  border: 1px solid #ffd54f;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  color: #ef6c00;
 }
 
 /* Map Container */
@@ -1288,7 +849,6 @@ export default {
   border-radius: 2vh;
   overflow: hidden;
   position: relative;
-  min-height: 300px; 
 }
 
 .map-header {
@@ -1315,12 +875,10 @@ export default {
   font-size: 0.8rem;
 }
 
-#map {
+.selectable-map {
   height: 300px;
   width: 100%;
-  background: #f8f9fa;
-  position: relative; 
-  z-index: 1; 
+  position: relative;
 }
 
 .map-instruction {
@@ -1474,13 +1032,32 @@ export default {
     min-width: auto;
   }
   
-  #map {
-      height: 250px; 
- }
+  .selectable-map {
+    height: 250px;
+  }
+
+  .category-pills {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.8vh;
+  }
+
+  .category-pill {
+    padding: 1.2vh 0.8vh;
+  }
+
+  .pill-text {
+    font-size: 0.8rem;
+  }
 
   .add-product-container,
   .form-container {
     transform: none !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .category-pills {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 </style>

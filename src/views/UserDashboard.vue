@@ -6,15 +6,12 @@
     </div>
 
     <div class="dashboard-content">
-      <!-- Layout Grid Utama dengan Profile di Kanan -->
       <div class="dashboard-grid">
-        <!-- Kolom Kiri: Konten Utama -->
         <div class="main-content">
-          <!-- Stats Cards -->
           <div class="stats-section">
             <div class="stats-grid">
               <div class="stat-card">
-                <div class="stat-icon primary">
+                <div class="stat-icon">
                   <HeroIcon icon="check" size="xl" color="success" />
                 </div>
                 <div class="stat-info">
@@ -22,9 +19,9 @@
                   <span class="stat-label">Produk Aktif</span>
                 </div>
               </div>
-              
+
               <div class="stat-card">
-                <div class="stat-icon warning">
+                <div class="stat-icon">
                   <HeroIcon icon="x-mark" size="xl" color="warning" />
                 </div>
                 <div class="stat-info">
@@ -32,9 +29,9 @@
                   <span class="stat-label">Produk Nonaktif</span>
                 </div>
               </div>
-              
+
               <div class="stat-card">
-                <div class="stat-icon success">
+                <div class="stat-icon">
                   <HeroIcon icon="eye" size="xl" color="primary" />
                 </div>
                 <div class="stat-info">
@@ -45,7 +42,6 @@
             </div>
           </div>
 
-          <!-- Produk Saya -->
           <div class="products-section">
             <div class="section-header">
               <h2>Produk Saya</h2>
@@ -54,7 +50,7 @@
                 Tambah Produk
               </button>
             </div>
-            
+
             <div class="product-filters">
               <button 
                 v-for="filter in productFilters" 
@@ -65,12 +61,12 @@
                 {{ filter.label }}
               </button>
             </div>
-            
+
             <div v-if="loadingProducts" class="loading">
               <HeroIcon icon="info" size="xl" color="secondary" />
               <p>Memuat produk...</p>
             </div>
-            
+
             <div v-else class="products-grid">
               <ProductCard 
                 v-for="product in filteredUserProducts" 
@@ -83,7 +79,7 @@
                 @action="handleProductAction"
               />
             </div>
-            
+
             <div v-if="!loadingProducts && filteredUserProducts.length === 0" class="empty-state">
               <div class="empty-icon">
                 <HeroIcon icon="shopping-bag" size="xl" color="secondary" />
@@ -97,17 +93,16 @@
             </div>
           </div>
 
-          <!-- Komentar Saya -->
           <div class="comments-section">
             <div class="section-header">
               <h2>Komentar Saya</h2>
             </div>
-            
+
             <div v-if="loadingComments" class="loading">
               <HeroIcon icon="info" size="xl" color="secondary" />
               <p>Memuat komentar...</p>
             </div>
-            
+
             <div v-else class="comments-list">
               <div v-for="comment in userComments" :key="comment.id" class="comment-card">
                 <div class="comment-header">
@@ -117,24 +112,9 @@
                   <div class="comment-meta">
                     <span class="comment-date">{{ formatDate(comment.created_at) }}</span>
                     <span :class="`comment-status status-${comment.status}`">
-                      <HeroIcon 
-                        v-if="comment.status === 'approved'" 
-                        icon="check" 
-                        size="md" 
-                        color="success" 
-                      />
-                      <HeroIcon 
-                        v-else-if="comment.status === 'pending'" 
-                        icon="info" 
-                        size="md" 
-                        color="warning" 
-                      />
-                      <HeroIcon 
-                        v-else 
-                        icon="x-mark" 
-                        size="md" 
-                        color="error" 
-                      />
+                      <HeroIcon v-if="comment.status === 'approved'" icon="check" size="md" color="success" />
+                      <HeroIcon v-else-if="comment.status === 'pending'" icon="info" size="md" color="warning" />
+                      <HeroIcon v-else icon="x-mark" size="md" color="error" />
                       {{ comment.status }}
                     </span>
                   </div>
@@ -152,7 +132,7 @@
                 </div>
               </div>
             </div>
-            
+
             <div v-if="!loadingComments && userComments.length === 0" class="empty-state">
               <HeroIcon icon="chat-bubble" size="xl" color="secondary" />
               <p>Belum ada komentar.</p>
@@ -160,9 +140,7 @@
           </div>
         </div>
 
-        <!-- Kolom Kanan: Profil -->
         <div class="sidebar">
-          <!-- Profil & Aktivitas -->
           <div class="profile-section">
             <h2>Profil & Aktivitas</h2>
             <div class="profile-card">
@@ -220,10 +198,7 @@ import HeroIcon from '../components/HeroIcon.vue'
 
 export default {
   name: 'UserDashboard',
-  components: {
-    ProductCard,
-    HeroIcon
-  },
+  components: { ProductCard, HeroIcon },
   setup() {
     const userProducts = ref([])
     const userComments = ref([])
@@ -244,11 +219,8 @@ export default {
       { value: 'unavailable', label: 'Nonaktif' }
     ]
 
-    // Handle error saat gambar tidak bisa dimuat
     const handleImageError = (event) => {
-      console.log('Gambar profil tidak ditemukan, menggunakan placeholder')
       event.target.style.display = 'none'
-      // Gambar akan digantikan oleh placeholder di template
     }
 
     const fetchUserProducts = async () => {
@@ -256,8 +228,7 @@ export default {
         loadingProducts.value = true
         const response = await api.get('/my-products')
         userProducts.value = response.data.data || response.data
-      } catch (error) {
-        console.error('Error fetching user products:', error)
+      } catch {
         toast.error('Gagal memuat produk')
       } finally {
         loadingProducts.value = false
@@ -265,40 +236,17 @@ export default {
     }
 
     const fetchUserComments = async () => {
-      try {
-        loadingComments.value = true
-        userComments.value = [
-          {
-            id: 1,
-            comment: "Produk sangat berkualitas, pengiriman cepat!",
-            product: { title: "Sampah Rosoq Premium" },
-            status: "approved",
-            created_at: "2024-01-15T10:30:00Z"
-          },
-          {
-            id: 2,
-            comment: "Seller ramah dan responsif, barang sesuai deskripsi",
-            product: { title: "Sampah Rosoq Standard" },
-            status: "pending",
-            created_at: "2024-01-14T15:20:00Z"
-          }
-        ]
-      } catch (error) {
-        console.error('Error fetching comments:', error)
-      } finally {
-        loadingComments.value = false
-      }
+      loadingComments.value = true
+      userComments.value = []
+      loadingComments.value = false
     }
 
-    // Fetch user data yang lebih lengkap termasuk foto
     const fetchUserData = async () => {
       try {
         const response = await api.get('/user/profile')
         const userData = response.data.data || response.data
         userPhoto.value = userData.photo || userData.photo_url || userData.avatar || ''
-      } catch (error) {
-        console.error('Error fetching user data:', error)
-      }
+      } catch {}
     }
 
     onMounted(() => {
@@ -307,105 +255,85 @@ export default {
       fetchUserData()
     })
 
-    const activeProductsCount = computed(() => {
-      return userProducts.value.filter(product => product.status === 'available').length
-    })
+    const activeProductsCount = computed(() =>
+      userProducts.value.filter(p => p.status === 'available').length
+    )
 
-    const inactiveProductsCount = computed(() => {
-      return userProducts.value.filter(product => product.status === 'unavailable').length
-    })
+    const inactiveProductsCount = computed(() =>
+      userProducts.value.filter(p => p.status === 'unavailable').length
+    )
 
-    const totalViews = computed(() => {
-      return userProducts.value.reduce((total, product) => total + (product.views || 0), 0)
-    })
+    const totalViews = computed(() =>
+      userProducts.value.reduce((t, p) => t + (p.views || 0), 0)
+    )
 
-    const filteredUserProducts = computed(() => {
-      if (activeFilter.value === 'all') return userProducts.value
-      return userProducts.value.filter(product => product.status === activeFilter.value)
-    })
+    const filteredUserProducts = computed(() =>
+      activeFilter.value === 'all'
+        ? userProducts.value
+        : userProducts.value.filter(p => p.status === activeFilter.value)
+    )
 
-    const formatProductData = (product) => {
-      console.log('Product data:', product);
-      return {
-        id: product.id,
-        title: product.title,
-        description: product.description,
-        price: product.price,
-        status: product.status,
-        photo: product.photo,
-        photo_url: product.photo_url,
-        address: product.address,
-        category: product.category,
-        location: product.address || "Lokasi tidak tersedia",
-        user: product.user || { name: userName }
+    const formatProductData = (p) => {
+      let imageUrl = ''
+
+      // Gunakan URL dari backend jika sudah lengkap
+      if (p.photo_url) {
+        imageUrl = p.photo_url
       }
+      // Jika hanya path disimpan (contoh: "produk/abc.jpg")
+      else if (p.photo) {
+        const cleanPath = p.photo.replace(/\\/g, '/')
+        imageUrl = `http://127.0.0.1:8000/storage/${cleanPath}`
+      } 
+      // Jika tidak ada gambar sama sekali
+      else {
+        imageUrl = '/default-product.png'
+      }
+
+      return { ...p, photo: imageUrl, photo_url: imageUrl }
     }
 
-    const getActionText = (status) => {
-      return status === 'available' ? 'Edit' : 'Aktifkan'
-    }
 
-    const getFilterLabel = (filterValue) => {
-      const filter = productFilters.find(f => f.value === filterValue)
-      return filter ? filter.label : 'Semua'
-    }
+    const getActionText = (status) => (status === 'available' ? 'Edit' : 'Aktifkan')
+
+    const getFilterLabel = (val) =>
+      productFilters.find(f => f.value === val)?.label || 'Semua'
 
     const formatDate = (dateString) => {
       if (!dateString) return ''
       const date = new Date(dateString)
-      return date.toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      })
+      return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
     }
 
-    const addProduct = () => {
-      router.push('/product/add')
-    }
+    const addProduct = () => router.push('/product/add')
+    const editProfile = () => router.push('/profile/edit')
+    const viewProductDetail = (id) => router.push(`/product/${id}`)
 
-    const editProfile = () => {
-      router.push('/profile/edit')
-    }
-
-    const viewProductDetail = (productId) => {
-      router.push(`/product/${productId}`)
-    }
-
-    const handleProductAction = async (productId) => {
-      const product = userProducts.value.find(p => p.id === productId)
+    const handleProductAction = async (id) => {
+      const product = userProducts.value.find(p => p.id === id)
       if (product.status === 'available') {
-        router.push(`/product/edit/${productId}`)
+        router.push(`/product/edit/${id}`)
       } else {
-        await activateProduct(productId)
+        await activateProduct(id)
       }
     }
 
-    const activateProduct = async (productId) => {
+    const activateProduct = async (id) => {
       try {
-        await api.put(`/produks/${productId}`, { status: 'available' })
+        await api.put(`/produks/${id}`, { status: 'available' })
         toast.success('Produk berhasil diaktifkan')
         fetchUserProducts()
-      } catch (error) {
-        console.error('Error activating product:', error)
+      } catch {
         toast.error('Gagal mengaktifkan produk')
       }
     }
 
-    const editComment = (commentId) => {
-      toast.info('Fitur edit komentar akan segera tersedia')
-    }
+    const editComment = () => toast.info('Fitur edit komentar belum tersedia')
 
-    const deleteComment = async (commentId) => {
+    const deleteComment = async () => {
       if (!confirm('Yakin ingin menghapus komentar ini?')) return
-      
-      try {
-        toast.success('Komentar berhasil dihapus')
-        fetchUserComments()
-      } catch (error) {
-        console.error('Error deleting comment:', error)
-        toast.error('Gagal menghapus komentar')
-      }
+      toast.success('Komentar berhasil dihapus')
+      fetchUserComments()
     }
 
     return {

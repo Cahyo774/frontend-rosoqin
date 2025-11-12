@@ -5,7 +5,6 @@ import router from "./router";
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap'
 import './style.css'
-// import DinamicBackground from "./components/DinamicBackground.vue";
 
 import Toast from "vue-toastification";
 import "vue-toastification/dist/index.css";
